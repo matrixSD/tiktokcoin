@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>شحن عملات TikTok</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background-color: #f9f9f9;
+      margin: 0;
+      padding: 0;
+      direction: rtl;
+    }
+    .top-bar {
+      background: #fff;
+      padding: 10px 20px;
+      border-bottom: 1px solid #ccc;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .top-bar img {
+      height: 24px;
+    }
+    .container {
+      max-width: 920px;
+      margin: 40px auto;
+      background: #fff;
+      border-radius: 10px;
+      padding: 30px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    }
+    .user-box {
+      display: flex;
+      align-items: center;
+      background: #f1f1f1;
+      padding: 10px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+    }
+    .user-box img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin-left: 15px;
+    }
+    .user-info {
+      flex-grow: 1;
+    }
+    #username {
+      width: 100%;
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    .coins {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+    .coin-box {
+      flex: 1 1 calc(25% - 20px);
+      background: #fff;
+      border: 2px solid #eee;
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .coin-box:hover {
+      border-color: #ff004f;
+    }
+    .coin-box.selected {
+      border-color: #ff004f;
+      background: #fff5f8;
+    }
+    .coin-amount {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .coin-price {
+      color: #777;
+    }
+    .total {
+      font-weight: bold;
+      font-size: 18px;
+      margin: 15px 0;
+      text-align: left;
+    }
+    .btn-recharge {
+      background-color: #ff004f;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      width: 100%;
+      padding: 12px;
+      font-size: 18px;
+    }
+    .popup, .overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+    }
+    .overlay.show {
+      display: block;
+      background: rgba(0,0,0,0.3);
+      z-index: 999;
+    }
+    .popup.show {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    .popup-box {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      text-align: center;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+    }
+    .popup-box button {
+      background-color: #ff004f;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      padding: 10px 20px;
+      margin-top: 20px;
+      font-size: 16px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-bar">
+  <img src="https://www.tiktok.com/favicon.ico" alt="TikTok"> 
+  <div>شحن العملات</div>
+</div>
+
+<div class="container">
+  <div class="user-box">
+    <img src="https://placehold.co/50x50" alt="user">
+    <div class="user-info">
+      <input type="text" id="username" placeholder="اكتب اسم المستخدم هنا">
+    </div>
+  </div>
+
+  <div class="coins">
+    <div class="coin-box" onclick="selectCoin(this, 30, 19)">
+      <div class="coin-amount">30</div>
+      <div class="coin-price">EGP19</div>
+    </div>
+    <div class="coin-box" onclick="selectCoin(this, 60, 39)">
+      <div class="coin-amount">60</div>
+      <div class="coin-price">EGP39</div>
+    </div>
+    <div class="coin-box" onclick="selectCoin(this, 80, 50)">
+      <div class="coin-amount">80</div>
+      <div class="coin-price">EGP50</div>
+    </div>
+    <div class="coin-box" onclick="selectCoin(this, 100, 65)">
+      <div class="coin-amount">100</div>
+      <div class="coin-price">EGP65</div>
+    </div>
+    <div class="coin-box" onclick="selectCoin(this, 150, 95)">
+      <div class="coin-amount">150</div>
+      <div class="coin-price">EGP95</div>
+    </div>
+    <div class="coin-box" onclick="selectCoin(this, 210, 132.79)">
+      <div class="coin-amount">210</div>
+      <div class="coin-price">EGP132.79</div>
+    </div>
+    <div class="coin-box" onclick="selectCoin(this, 400, 255)">
+      <div class="coin-amount">400</div>
+      <div class="coin-price">EGP255</div>
+    </div>
+  </div>
+
+  <div class="total" id="totalText">الإجمالي: 0 جنيه</div>
+
+  <button class="btn-recharge" onclick="recharge()">شحن العملات</button>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<div class="popup" id="popup">
+  <div class="popup-box">
+    <p id="popupMessage"></p>
+    <button onclick="location.reload()">شحن جديد</button>
+  </div>
+</div>
+
+<script>
+  let totalCoins = 0;
+  let totalPrice = 0;
+
+  function selectCoin(element, coins, price) {
+    document.querySelectorAll('.coin-box').forEach(box => box.classList.remove('selected'));
+    element.classList.add('selected');
+    totalCoins = coins;
+    totalPrice = price;
+    document.getElementById('totalText').textContent = `الإجمالي: ${price} جنيه`;
+  }
+
+  function recharge() {
+    const username = document.getElementById('username').value;
+    if (!username || totalCoins === 0) {
+      alert('من فضلك أدخل اسم المستخدم واختر عدد العملات.');
+      return;
+    }
+    document.getElementById('popupMessage').textContent = `تم شحن ${totalCoins} عملة إلى المستخدم ${username}`;
+    document.getElementById('popup').classList.add('show');
+    document.getElementById('overlay').classList.add('show');
+  }
+</script>
+
+</body>
+</html>
